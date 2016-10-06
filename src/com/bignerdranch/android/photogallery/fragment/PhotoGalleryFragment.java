@@ -5,8 +5,11 @@ import java.util.List;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -15,10 +18,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.ImageView;
 
 import com.bignerdranch.android.photogallery.R;
 import com.bignerdranch.android.photogallery.domain.GalleryItem;
 import com.bignerdranch.android.photogallery.utils.FlickrFetcher;
+import com.bignerdranch.android.photogallery.utils.ThumbnailDownloader;
 
 public class PhotoGalleryFragment extends Fragment{
 	
@@ -27,6 +32,8 @@ public class PhotoGalleryFragment extends Fragment{
 	private GridView gvPhotoContainer;
 	
 	private List<GalleryItem> galleryItemList;
+	
+	private ThumbnailDownloader<ImageView> thumbnailDownloader;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -35,6 +42,23 @@ public class PhotoGalleryFragment extends Fragment{
 		setRetainInstance(true);
 		
 		new FetchItemTask().execute();
+		
+		thumbnailDownloader = new ThumbnailDownloader<ImageView>(new Handler());
+		thumbnailDownloader.setOnThumbnailDownloadedListener(
+				new ThumbnailDownloader.OnThumbnailDownloadedListener<ImageView>() {
+
+					@Override
+					public void onThumbnailDownloaded(ImageView imageView,
+							Bitmap thumbnail) {
+
+						if(isVisible()){
+							imageView.setImageBitmap(thumbnail);
+						}
+					}
+		});
+		thumbnailDownloader.start();
+		thumbnailDownloader.getLooper();
+		Log.d(TAG, "Background thread started");
 	}
 	
 	@Override
@@ -48,6 +72,19 @@ public class PhotoGalleryFragment extends Fragment{
 		return view;
 	}
 	
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		thumbnailDownloader.clearQueue();
+	}
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		thumbnailDownloader.quit();
+		Log.d(TAG, "Background thread destroyed");
+	}
+	
 	private void setupAdapter(){
 		
 		if(getActivity() == null || gvPhotoContainer == null){
@@ -55,9 +92,10 @@ public class PhotoGalleryFragment extends Fragment{
 		}
 		
 		if(galleryItemList != null){
-			ArrayAdapter<GalleryItem> adapter = 
-					new ArrayAdapter<>(getActivity(), android.R.layout.simple_gallery_item
-							, galleryItemList);
+					
+			GalleryItemAdapter adapter = 
+					new GalleryItemAdapter(getActivity(),
+							R.layout.gallery_item_photo_view, galleryItemList);
 			gvPhotoContainer.setAdapter(adapter);
 		}else{
 			gvPhotoContainer.setAdapter(null);
@@ -87,6 +125,36 @@ public class PhotoGalleryFragment extends Fragment{
 			
 			galleryItemList = itemList;
 			setupAdapter();
+		}
+		
+	}
+	
+	private class GalleryItemAdapter extends ArrayAdapter<GalleryItem>{
+		
+		private int resourceId;
+
+		public GalleryItemAdapter(Context context, int resource,
+				List<GalleryItem> objects) {
+			super(context, resource, objects);
+			resourceId = resource;
+		}
+		
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			
+			GalleryItem galleryItem = getItem(position);
+			
+			View view = convertView;
+			if(view == null){
+				view = LayoutInflater.from(getContext()).inflate(resourceId, parent, false);
+			}
+			
+			ImageView ivPhoto = (ImageView) view.findViewById(R.id.iv_photo);
+			ivPhoto.setImageResource(R.drawable.loading);
+			
+			thumbnailDownloader.queueThumbnail(ivPhoto, galleryItem.getUrl());
+			
+			return view;
 		}
 		
 	}
