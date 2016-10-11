@@ -57,7 +57,7 @@ public class FlickrFetcher {
 
 			connection.setDoInput(true);
 			
-			Log.d(TAG, "ready to get response code");
+//			Log.d(TAG, "ready to get response code");
 			
 			int code = connection.getResponseCode();
 			if(code != 200){
@@ -65,7 +65,7 @@ public class FlickrFetcher {
 						+".message:"+connection.getResponseMessage());
 			}
 			
-			Log.d(TAG, "response code:"+code);
+//			Log.d(TAG, "response code:"+code);
 			
 			InputStream inputStream = connection.getInputStream();
 			
@@ -121,7 +121,7 @@ public class FlickrFetcher {
 					.build().toString();
 		
 		String xmlContent = getUrlContent(url);
-		Log.d(TAG, "xml content:"+xmlContent);
+//		Log.d(TAG, "xml content:"+xmlContent);
 		
 		XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
 		XmlPullParser parser = factory.newPullParser();

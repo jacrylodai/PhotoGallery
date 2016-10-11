@@ -50,7 +50,11 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
 					
 					Token token = (Token) msg.obj;
 					String url = requestMap.get(token);
-					Log.d(TAG, "Got a request for url:"+url);
+					Log.i(TAG, "handleMessage:Got a request for url:"+url);
+					if(url == null){
+						Log.i(TAG, "handleMessage:url is null"+token.toString());
+						return;
+					}
 					
 					handleRequest(token);
 					break;
@@ -63,7 +67,8 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
 	}
 	
 	public void queueThumbnail(Token token,String url){
-		Log.d(TAG, "Got an url:"+url);
+		Log.i(TAG, "queueThumbnail:Got an url:"+url);
+		Log.i(TAG, "queueThumbnail:Got an url for token:"+token.toString());
 		
 		requestMap.put(token, url);
 		handler
@@ -74,19 +79,17 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
 	private void handleRequest(final Token token){
 		
 		final String url = requestMap.get(token);
-		if(url == null){
-			return;
-		}
 		
 		byte[] bitmapBytes = null;
 		try {
 			bitmapBytes = new FlickrFetcher().getUrlBytes(url);
 		} catch (IOException e) {
-			Log.e(TAG, "Error download image", e);
+			Log.e(TAG, "handleRequest:Error download image", e);
+			return;
 		}
 		
 		final Bitmap bitmap = BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.length);
-		Log.d(TAG, "bitmap created");
+		Log.i(TAG, "handleRequest:bitmap created");
 		
 		responseHandler.post(new Runnable() {
 			
@@ -94,10 +97,12 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
 			public void run() {
 
 				if(requestMap.get(token) != url){
+					Log.i(TAG, "responseHandler.post.run:token is null"+token.toString());
 					return;
 				}
 				
 				requestMap.remove(token);
+				Log.i(TAG, "responseHandler.post.run:remove token"+token.toString());
 				onThumbnailDownloadedListener.onThumbnailDownloaded(token, bitmap);
 			}
 		});

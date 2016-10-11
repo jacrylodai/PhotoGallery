@@ -152,6 +152,8 @@ public class PhotoGalleryFragment extends Fragment{
 			ImageView ivPhoto = (ImageView) view.findViewById(R.id.iv_photo);
 			ivPhoto.setImageResource(R.drawable.loading);
 			
+			Log.i(TAG, "GalleryItemAdapter.getView: getView at position:"+position);
+			
 			thumbnailDownloader.queueThumbnail(ivPhoto, galleryItem.getUrl());
 			
 			return view;

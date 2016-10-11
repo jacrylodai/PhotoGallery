@@ -3,7 +3,7 @@
     android:id="@+id/gv_photo_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:columnWidth="120dp"
+    android:columnWidth="180dp"
     android:numColumns="auto_fit"
     android:stretchMode="columnWidth"
 	>
