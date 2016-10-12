@@ -1,5 +1,7 @@
 package com.bignerdranch.android.photogallery.domain;
 
+import android.graphics.Bitmap;
+
 public class GalleryItem {
 	
 	private String caption;
@@ -7,6 +9,13 @@ public class GalleryItem {
 	private String id;
 	
 	private String url;
+	
+	private Bitmap bitmap;
+	
+	public GalleryItem(){
+		
+		bitmap = null;
+	}
 
 	public String getCaption() {
 		return caption;
@@ -32,6 +41,14 @@ public class GalleryItem {
 		this.url = url;
 	}
 	
+	public Bitmap getBitmap() {
+		return bitmap;
+	}
+
+	public void setBitmap(Bitmap bitmap) {
+		this.bitmap = bitmap;
+	}
+
 	@Override
 	public String toString() {
 		return caption;

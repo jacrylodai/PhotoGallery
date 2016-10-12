@@ -49,10 +49,11 @@ public class PhotoGalleryFragment extends Fragment{
 
 					@Override
 					public void onThumbnailDownloaded(ImageView imageView,
-							Bitmap thumbnail) {
+							GalleryItem galleryItem) {
 
 						if(isVisible()){
-							imageView.setImageBitmap(thumbnail);
+							imageView.setImageBitmap(galleryItem.getBitmap());
+							
 						}
 					}
 		});
@@ -143,18 +144,31 @@ public class PhotoGalleryFragment extends Fragment{
 		public View getView(int position, View convertView, ViewGroup parent) {
 			
 			GalleryItem galleryItem = getItem(position);
-			
-			View view = convertView;
-			if(view == null){
-				view = LayoutInflater.from(getContext()).inflate(resourceId, parent, false);
-			}
-			
-			ImageView ivPhoto = (ImageView) view.findViewById(R.id.iv_photo);
-			ivPhoto.setImageResource(R.drawable.loading);
-			
+
 			Log.i(TAG, "GalleryItemAdapter.getView: getView at position:"+position);
 			
-			thumbnailDownloader.queueThumbnail(ivPhoto, galleryItem.getUrl());
+			View view = convertView;
+			view = LayoutInflater.from(getContext()).inflate(resourceId, parent, false);
+			
+//			if(view == null){
+//				Log.i(TAG, "GalleryItemAdapter.getView: create new view");
+//				view = LayoutInflater.from(getContext()).inflate(resourceId, parent, false);
+//			}else{
+//				Log.i(TAG, "GalleryItemAdapter.getView: reuse old view,view Id:"+view.toString());
+//			}
+			
+			Bitmap bitmap = galleryItem.getBitmap();
+			ImageView ivPhoto = (ImageView) view.findViewById(R.id.iv_photo);
+			
+			if(bitmap == null){
+
+				ivPhoto.setImageResource(R.drawable.loading);
+				
+				thumbnailDownloader.queueThumbnail(ivPhoto, galleryItem);
+			}else{
+				
+				ivPhoto.setImageBitmap(bitmap);
+			}
 			
 			return view;
 		}
