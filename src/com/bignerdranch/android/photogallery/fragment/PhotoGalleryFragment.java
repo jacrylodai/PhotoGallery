@@ -37,6 +37,8 @@ public class PhotoGalleryFragment extends Fragment{
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		
+		Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		
 		setRetainInstance(true);
@@ -65,23 +67,27 @@ public class PhotoGalleryFragment extends Fragment{
 	@Override
 	public View onCreateView(LayoutInflater inflater,
 			@Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-		
+
+		Log.d(TAG, "onCreateView");
 		View view = inflater.inflate(R.layout.fragment_photo_gallery, container, false);
 		
 		gvPhotoContainer = (GridView) view.findViewById(R.id.gv_photo_container);
-		
+		setupAdapter();
 		return view;
 	}
 	
 	@Override
 	public void onDestroyView() {
+
 		super.onDestroyView();
+		Log.d(TAG, "onDestroyView");
 		thumbnailDownloader.clearQueue();
 	}
 	
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		Log.d(TAG, "onDestroy");
 		thumbnailDownloader.quit();
 		Log.d(TAG, "Background thread destroyed");
 	}
@@ -148,14 +154,13 @@ public class PhotoGalleryFragment extends Fragment{
 			Log.i(TAG, "GalleryItemAdapter.getView: getView at position:"+position);
 			
 			View view = convertView;
-			view = LayoutInflater.from(getContext()).inflate(resourceId, parent, false);
 			
-//			if(view == null){
-//				Log.i(TAG, "GalleryItemAdapter.getView: create new view");
-//				view = LayoutInflater.from(getContext()).inflate(resourceId, parent, false);
-//			}else{
-//				Log.i(TAG, "GalleryItemAdapter.getView: reuse old view,view Id:"+view.toString());
-//			}
+			if(view == null){
+				Log.i(TAG, "GalleryItemAdapter.getView: create new view");
+				view = LayoutInflater.from(getContext()).inflate(resourceId, parent, false);
+			}else{
+				Log.i(TAG, "GalleryItemAdapter.getView: reuse old view,view Id:"+view.toString());
+			}
 			
 			Bitmap bitmap = galleryItem.getBitmap();
 			ImageView ivPhoto = (ImageView) view.findViewById(R.id.iv_photo);
@@ -168,6 +173,8 @@ public class PhotoGalleryFragment extends Fragment{
 			}else{
 				
 				ivPhoto.setImageBitmap(bitmap);
+				
+				thumbnailDownloader.removeThumbnail(ivPhoto);
 			}
 			
 			return view;

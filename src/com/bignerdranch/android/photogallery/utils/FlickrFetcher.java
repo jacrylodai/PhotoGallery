@@ -26,10 +26,10 @@ public class FlickrFetcher {
 	private static final String TAG = "FlickrFecher";
 	
 	//默认连接超时时间，毫秒
-	private static final int DEFAULT_CONNECT_TIME_OUT = 5000;
+	private static final int DEFAULT_CONNECT_TIME_OUT = 7000;
 	
 	//默认读取超时时间，毫秒
-	private static final int DEFAULT_READ_TIME_OUT = 5000;
+	private static final int DEFAULT_READ_TIME_OUT = 7000;
 	
 	private static final String ENDPOINT = "https://api.flickr.com/services/rest/";
 

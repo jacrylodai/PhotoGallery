@@ -70,6 +70,17 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
 			.sendToTarget();
 	}
 	
+	/**
+	 * 清除对当前视图对应的下载命令，一旦当前视图有已经存在的图片
+	 * ，就直接加载，之前的下载命令全部作废
+	 * @param token
+	 */
+	public void removeThumbnail(Token token){
+		
+		requestMap.remove(token);
+		handler.removeMessages(MESSAGE_DOWNLOAD, token);
+	}
+	
 	private void handleRequest(final Token token){
 		
 		final GalleryItem galleryItem = requestMap.get(token);
