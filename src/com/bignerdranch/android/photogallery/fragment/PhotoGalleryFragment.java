@@ -12,8 +12,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -42,6 +46,7 @@ public class PhotoGalleryFragment extends Fragment{
 		super.onCreate(savedInstanceState);
 		
 		setRetainInstance(true);
+		setHasOptionsMenu(true);
 		
 		new FetchItemTask().execute();
 		
@@ -92,6 +97,30 @@ public class PhotoGalleryFragment extends Fragment{
 		Log.d(TAG, "Background thread destroyed");
 	}
 	
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		super.onCreateOptionsMenu(menu, inflater);
+		inflater.inflate(R.menu.fragment_photo_gallery, menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		
+		switch (item.getItemId()) {
+		case R.id.menu_item_search:
+			
+			getActivity().onSearchRequested();
+			return true;
+			
+		case R.id.menu_item_clear_search:
+			
+			return true;
+
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+	
 	private void setupAdapter(){
 		
 		if(getActivity() == null || gvPhotoContainer == null){
@@ -116,8 +145,14 @@ public class PhotoGalleryFragment extends Fragment{
 			
 			FlickrFetcher flickrFetcher = new FlickrFetcher();
 			List<GalleryItem> galleryItemList = null;
+			
+			String query = "android";
 			try {
-				galleryItemList = flickrFetcher.fetchItems();
+				if(TextUtils.isEmpty(query)){
+					galleryItemList = flickrFetcher.fetchItems();
+				}else{
+					galleryItemList = flickrFetcher.searchItems(query);
+				}
 			} catch (IOException e) {
 				Log.e(TAG, "error", e);
 			} catch (XmlPullParserException e) {

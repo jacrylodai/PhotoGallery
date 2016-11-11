@@ -37,9 +37,13 @@ public class FlickrFetcher {
 
 	private static final String METHOD_GET_RECENT = "flickr.photos.getRecent";
 
+	private static final String METHOD_SEARCH = "flickr.photos.search";
+
 	private static final String PARAM_EXTRAS = "extras";
 
 	private static final String EXTRA_SMALL_URL = "url_s";
+	
+	private static final String PARAM_TEXT = "text";
 
 	private static final String XML_PHOTO = "photo";
 
@@ -111,7 +115,6 @@ public class FlickrFetcher {
 	
 	public List<GalleryItem> fetchItems() throws IOException, XmlPullParserException{
 		
-		List<GalleryItem> galleryItemList = new ArrayList<GalleryItem>();
 		String url = 
 				Uri.parse(ENDPOINT)
 					.buildUpon()
@@ -120,8 +123,30 @@ public class FlickrFetcher {
 					.appendQueryParameter(PARAM_EXTRAS, EXTRA_SMALL_URL)
 					.build().toString();
 		
-		String xmlContent = getUrlContent(url);
-//		Log.d(TAG, "xml content:"+xmlContent);
+		return downloadGalleryItemList(url);
+	}
+	
+	public List<GalleryItem> searchItems(String query) 
+			throws IOException, XmlPullParserException{
+
+		String url = 
+				Uri.parse(ENDPOINT)
+					.buildUpon()
+					.appendQueryParameter("method", METHOD_SEARCH)
+					.appendQueryParameter("api_key", API_KEY)
+					.appendQueryParameter(PARAM_EXTRAS, EXTRA_SMALL_URL)
+					.appendQueryParameter(PARAM_TEXT, query)
+					.build().toString();
+		return downloadGalleryItemList(url);
+	}
+
+	public List<GalleryItem> downloadGalleryItemList(String webUrl) 
+			throws IOException, XmlPullParserException{
+
+		List<GalleryItem> galleryItemList = new ArrayList<GalleryItem>();
+		
+		String xmlContent = getUrlContent(webUrl);
+		Log.d(TAG, "xml content:"+xmlContent);
 		
 		XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
 		XmlPullParser parser = factory.newPullParser();
