@@ -95,6 +95,7 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
 		try {
 			bitmapBytes = new FlickrFetcher().getUrlBytes(galleryItem.getUrl());
 		} catch (IOException e) {
+			Log.e(TAG, "handleRequest:Error download image url:"+galleryItem.getUrl());
 			Log.e(TAG, "handleRequest:Error download image", e);
 			return;
 		}

@@ -25,6 +25,8 @@ public class FlickrFetcher {
 	
 	private static final String TAG = "FlickrFecher";
 	
+	public static final String PREF_SEARCH_QUERY = "searchQuery";
+	
 	//默认连接超时时间，毫秒
 	private static final int DEFAULT_CONNECT_TIME_OUT = 7000;
 	

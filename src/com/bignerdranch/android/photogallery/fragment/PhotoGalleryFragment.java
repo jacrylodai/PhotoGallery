@@ -5,11 +5,14 @@ import java.util.List;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
@@ -48,7 +51,7 @@ public class PhotoGalleryFragment extends Fragment{
 		setRetainInstance(true);
 		setHasOptionsMenu(true);
 		
-		new FetchItemTask().execute();
+		updateGalleryItems();
 		
 		thumbnailDownloader = new ThumbnailDownloader<ImageView>(new Handler());
 		thumbnailDownloader.setOnThumbnailDownloadedListener(
@@ -114,11 +117,23 @@ public class PhotoGalleryFragment extends Fragment{
 			
 		case R.id.menu_item_clear_search:
 			
+			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+			pref.edit()
+				.remove(FlickrFetcher.PREF_SEARCH_QUERY)
+				.commit();
+			
+			updateGalleryItems();
+			
 			return true;
 
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+	
+	public void updateGalleryItems(){
+		
+		new FetchItemTask().execute();
 	}
 	
 	private void setupAdapter(){
@@ -146,7 +161,14 @@ public class PhotoGalleryFragment extends Fragment{
 			FlickrFetcher flickrFetcher = new FlickrFetcher();
 			List<GalleryItem> galleryItemList = null;
 			
-			String query = "android";
+			String query = "";
+			
+			Activity activity = getActivity();
+			if(activity != null){
+				SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(activity);
+				query = pref.getString(FlickrFetcher.PREF_SEARCH_QUERY, "");
+			}
+			
 			try {
 				if(TextUtils.isEmpty(query)){
 					galleryItemList = flickrFetcher.fetchItems();
