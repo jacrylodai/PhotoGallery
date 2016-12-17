@@ -27,11 +27,13 @@ public class FlickrFetcher {
 	
 	public static final String PREF_SEARCH_QUERY = "searchQuery";
 	
+	public static final String PREF_LAST_RESULT_ID = "lastResultId";
+	
 	//默认连接超时时间，毫秒
-	private static final int DEFAULT_CONNECT_TIME_OUT = 7000;
+	private static final int DEFAULT_CONNECT_TIME_OUT = 5000;
 	
 	//默认读取超时时间，毫秒
-	private static final int DEFAULT_READ_TIME_OUT = 7000;
+	private static final int DEFAULT_READ_TIME_OUT = 5000;
 	
 	private static final String ENDPOINT = "https://api.flickr.com/services/rest/";
 
@@ -49,7 +51,12 @@ public class FlickrFetcher {
 
 	private static final String XML_PHOTO = "photo";
 
+
 	public byte[] getUrlBytes(String webUrl) throws IOException{
+		return getUrlBytes(webUrl, DEFAULT_CONNECT_TIME_OUT, DEFAULT_READ_TIME_OUT);
+	}
+
+	public byte[] getUrlBytes(String webUrl,int connectTimeOut,int readTimeOut) throws IOException{
 		
 		HttpURLConnection connection = null;
 		byte[] result = null;

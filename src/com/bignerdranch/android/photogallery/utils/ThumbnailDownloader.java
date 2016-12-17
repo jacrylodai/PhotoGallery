@@ -63,7 +63,9 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
 	
 	public void queueThumbnail(Token token,GalleryItem galleryItem){
 		Log.i(TAG, "queueThumbnail:Got an image Id:"+galleryItem.getId());
-		
+		if(requestMap.containsKey(token)){
+			Log.i(TAG, "queueThumbnail:token exist in the map,replace a new picture");
+		}
 		requestMap.put(token, galleryItem);
 		handler
 			.obtainMessage(MESSAGE_DOWNLOAD, token)
@@ -87,6 +89,7 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
 		
 		if(galleryItem == null){
 			Log.i(TAG, "handleRequest:gallery is null for token:"+token.toString());
+			requestMap.remove(token);
 			return;
 		}
 		Log.i(TAG, "handleRequest:Got a request for image:"+galleryItem.getId());
@@ -97,7 +100,24 @@ public class ThumbnailDownloader<Token> extends HandlerThread {
 		} catch (IOException e) {
 			Log.e(TAG, "handleRequest:Error download image url:"+galleryItem.getUrl());
 			Log.e(TAG, "handleRequest:Error download image", e);
-			return;
+			
+			//下载图片失败，先看显示组件是否已经替换了新的图片，
+			//如果没有就删除requestMap现有的数据，再重新发送下载请求
+			if(requestMap.get(token) != galleryItem){
+				Log.i(TAG, "gallery item is changed，Do not need to re-download");
+				return;
+			}else{
+				
+				requestMap.remove(token);
+				if(galleryItem.canRetryAgain()){
+					Log.i(TAG, "Retry again to download the picture:"+galleryItem.getUrl());
+					queueThumbnail(token, galleryItem);
+					galleryItem.retryOnce();
+				}else{
+					Log.i(TAG, "You have reached the max retry times,you can't download again");
+				}
+				return;
+			}
 		}
 		
 		final Bitmap bitmap = BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.length);

@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 
 public class GalleryItem {
 	
+	private static final int MAX_RETRY_TIMES = 3;
+	
 	private String caption;
 	
 	private String id;
@@ -12,9 +14,12 @@ public class GalleryItem {
 	
 	private Bitmap bitmap;
 	
+	private int retryTimes;
+	
 	public GalleryItem(){
 		
 		bitmap = null;
+		retryTimes = 0;
 	}
 
 	public String getCaption() {
@@ -47,6 +52,25 @@ public class GalleryItem {
 
 	public void setBitmap(Bitmap bitmap) {
 		this.bitmap = bitmap;
+	}
+	
+	/**
+	 * 图片下载失败，重试一次
+	 */
+	public void retryOnce(){
+		retryTimes++;
+	}
+	
+	/**
+	 * 是否还可以重试
+	 * @return
+	 */
+	public boolean canRetryAgain(){
+		if(retryTimes < MAX_RETRY_TIMES){
+			return true;
+		}else{
+			return false;
+		}
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
@@ -26,9 +27,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bignerdranch.android.photogallery.R;
 import com.bignerdranch.android.photogallery.domain.GalleryItem;
+import com.bignerdranch.android.photogallery.service.PollService;
 import com.bignerdranch.android.photogallery.utils.FlickrFetcher;
 import com.bignerdranch.android.photogallery.utils.ThumbnailDownloader;
 
@@ -52,6 +55,8 @@ public class PhotoGalleryFragment extends Fragment{
 		setHasOptionsMenu(true);
 		
 		updateGalleryItems();
+		
+		PollService.setServiceAlarm(getActivity(), true);
 		
 		thumbnailDownloader = new ThumbnailDownloader<ImageView>(new Handler());
 		thumbnailDownloader.setOnThumbnailDownloadedListener(
@@ -186,8 +191,13 @@ public class PhotoGalleryFragment extends Fragment{
 		@Override
 		protected void onPostExecute(List<GalleryItem> itemList) {
 			super.onPostExecute(itemList);
-			
 			galleryItemList = itemList;
+			if(galleryItemList == null || galleryItemList.size()==0){
+				Activity activity = getActivity();
+				if(activity != null){
+					Toast.makeText(getActivity(), "Õ¯¬Á¡¨Ω” ß∞‹", Toast.LENGTH_SHORT).show();
+				}
+			}
 			setupAdapter();
 		}
 		
