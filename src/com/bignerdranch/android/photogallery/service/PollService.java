@@ -5,27 +5,31 @@ import java.util.List;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import com.bignerdranch.android.photogallery.R;
+import com.bignerdranch.android.photogallery.activity.PhotoGalleryActivity;
 import com.bignerdranch.android.photogallery.domain.GalleryItem;
 import com.bignerdranch.android.photogallery.utils.FlickrFetcher;
 
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.IntentService;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
 public class PollService extends IntentService {
 
 	private static final String TAG = "PollService";
-	
-	private SharedPreferences pref;
 	
 	public PollService() {
 		super(TAG);
@@ -48,7 +52,7 @@ public class PollService extends IntentService {
 			Log.i(TAG, "Network is fine");
 		}
 		
-		pref = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 		String lastResultId = pref.getString(FlickrFetcher.PREF_LAST_RESULT_ID, "");
 		
 		FlickrFetcher flickrFetcher = new FlickrFetcher();
@@ -77,6 +81,24 @@ public class PollService extends IntentService {
 			Log.i(TAG, "There are new pictures");
 			
 			//process
+			Resources resources = getResources();
+			Intent i = new Intent(this,PhotoGalleryActivity.class);
+			PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,i , 0);
+			
+			Notification notification = 
+					new NotificationCompat.Builder(this)
+					.setTicker(resources.getString(R.string.new_pictures_title))
+					.setSmallIcon(android.R.drawable.ic_menu_report_image)
+					.setContentTitle(resources.getString(R.string.new_pictures_title))
+					.setContentText(resources.getString(R.string.new_pictures_text))
+					.setContentIntent(pendingIntent)
+					.setAutoCancel(true)
+					.build();
+			
+			NotificationManager notificationManager = 
+					(NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+			
+			notificationManager.notify(0, notification);
 			
 			//±£´æÐÂµÄid
 			SharedPreferences.Editor editor = pref.edit();
@@ -98,13 +120,22 @@ public class PollService extends IntentService {
 		
 		if(isOn){
 			long triggerAtMillis = System.currentTimeMillis();
-			long intervalMillis = 10*1000;
+			long intervalMillis = 5*60*1000;
 			alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, triggerAtMillis
 					, intervalMillis, pendingIntent);
 		}else{
 			alarmManager.cancel(pendingIntent);
 			pendingIntent.cancel();
 		}
+	}
+	
+	public static boolean isServiceAlarmOn(Context context){
+		
+		Intent intent = new Intent(context,PollService.class);
+		PendingIntent pendingIntent = 
+				PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_NO_CREATE);
+		boolean isOn = (pendingIntent != null);
+		return isOn;
 	}
 
 }

@@ -1,16 +1,19 @@
 package com.bignerdranch.android.photogallery.fragment;
 
 import java.io.IOException;
+import java.security.acl.LastOwnerException;
 import java.util.List;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -44,6 +47,8 @@ public class PhotoGalleryFragment extends Fragment{
 	private List<GalleryItem> galleryItemList;
 	
 	private ThumbnailDownloader<ImageView> thumbnailDownloader;
+	
+	private SharedPreferences pref;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -54,10 +59,10 @@ public class PhotoGalleryFragment extends Fragment{
 		setRetainInstance(true);
 		setHasOptionsMenu(true);
 		
+		pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		
 		updateGalleryItems();
-		
-		PollService.setServiceAlarm(getActivity(), true);
-		
+				
 		thumbnailDownloader = new ThumbnailDownloader<ImageView>(new Handler());
 		thumbnailDownloader.setOnThumbnailDownloadedListener(
 				new ThumbnailDownloader.OnThumbnailDownloadedListener<ImageView>() {
@@ -112,6 +117,21 @@ public class PhotoGalleryFragment extends Fragment{
 	}
 	
 	@Override
+	public void onPrepareOptionsMenu(Menu menu) {
+		super.onPrepareOptionsMenu(menu);
+		
+		MenuItem togglePollingItem = menu.findItem(R.id.menu_item_toggle_polling);
+
+		boolean isPollServiceOn = PollService.isServiceAlarmOn(getActivity());
+		if(isPollServiceOn){
+			togglePollingItem.setTitle(R.string.stop_polling);
+		}else{
+			togglePollingItem.setTitle(R.string.start_polling);
+		}
+	}
+	
+	@TargetApi(11)
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		
 		switch (item.getItemId()) {
@@ -122,12 +142,22 @@ public class PhotoGalleryFragment extends Fragment{
 			
 		case R.id.menu_item_clear_search:
 			
-			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
 			pref.edit()
 				.remove(FlickrFetcher.PREF_SEARCH_QUERY)
 				.commit();
 			
 			updateGalleryItems();
+			
+			return true;
+			
+		case R.id.menu_item_toggle_polling:
+			
+			boolean shouldTurnOn = !PollService.isServiceAlarmOn(getActivity());
+			PollService.setServiceAlarm(getActivity(), shouldTurnOn);
+			
+			if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
+				getActivity().invalidateOptionsMenu();
+			}
 			
 			return true;
 
@@ -184,6 +214,14 @@ public class PhotoGalleryFragment extends Fragment{
 				Log.e(TAG, "error", e);
 			} catch (XmlPullParserException e) {
 				Log.e(TAG, "error", e);
+			}
+			
+			if(galleryItemList != null && galleryItemList.size() > 0){
+
+				String newResultId = galleryItemList.get(0).getId();
+				pref.edit()
+					.putString(FlickrFetcher.PREF_LAST_RESULT_ID, newResultId)
+					.commit();
 			}
 			return galleryItemList;
 		}
