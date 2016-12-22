@@ -33,6 +33,9 @@ public class PollService extends IntentService {
 	
 	public static final String PREF_IS_ALARM_ON = "isAlarmOn";
 	
+	public static final String ACTION_SHOW_NOTIFICATION = 
+			"com.bignerdranch.android.photogallery.SHOW_NOTIFICATION";
+	
 	public PollService() {
 		super(TAG);
 	}
@@ -101,6 +104,9 @@ public class PollService extends IntentService {
 					(NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
 			
 			notificationManager.notify(0, notification);
+			
+			Intent actionIntent = new Intent(ACTION_SHOW_NOTIFICATION);
+			sendBroadcast(actionIntent);
 			
 			//±£´æÐÂµÄid
 			SharedPreferences.Editor editor = pref.edit();

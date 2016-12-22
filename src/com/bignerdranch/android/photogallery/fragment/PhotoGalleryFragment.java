@@ -38,7 +38,7 @@ import com.bignerdranch.android.photogallery.service.PollService;
 import com.bignerdranch.android.photogallery.utils.FlickrFetcher;
 import com.bignerdranch.android.photogallery.utils.ThumbnailDownloader;
 
-public class PhotoGalleryFragment extends Fragment{
+public class PhotoGalleryFragment extends VisibleFragment{
 	
 	private static final String TAG = "PhotoGalleryFragment";
 	
