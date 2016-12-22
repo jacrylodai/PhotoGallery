@@ -31,6 +31,8 @@ public class PollService extends IntentService {
 
 	private static final String TAG = "PollService";
 	
+	public static final String PREF_IS_ALARM_ON = "isAlarmOn";
+	
 	public PollService() {
 		super(TAG);
 	}
@@ -120,13 +122,18 @@ public class PollService extends IntentService {
 		
 		if(isOn){
 			long triggerAtMillis = System.currentTimeMillis();
-			long intervalMillis = 5*60*1000;
+			long intervalMillis = 15*1000;
 			alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, triggerAtMillis
 					, intervalMillis, pendingIntent);
 		}else{
 			alarmManager.cancel(pendingIntent);
 			pendingIntent.cancel();
 		}
+		
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+		pref.edit()
+			.putBoolean(PREF_IS_ALARM_ON, isOn)
+			.commit();
 	}
 	
 	public static boolean isServiceAlarmOn(Context context){
