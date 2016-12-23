@@ -2,6 +2,7 @@ package com.bignerdranch.android.photogallery.fragment;
 
 import com.bignerdranch.android.photogallery.service.PollService;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -20,9 +21,10 @@ public class VisibleFragment extends Fragment {
 				@Override
 				public void onReceive(Context context, Intent intent) {
 
-					Toast.makeText(context, "receive a broadcast:"+intent.getAction()
-							, Toast.LENGTH_SHORT).show();
 					Log.i(TAG, "receive a broadcast:"+intent.getAction());
+					//If we receive this,We are visible.
+					//so,Just cancel the notification
+					setResultCode(Activity.RESULT_CANCELED);
 				}
 			};
 	
@@ -30,7 +32,8 @@ public class VisibleFragment extends Fragment {
 	public void onResume() {
 		super.onResume();
 		IntentFilter intentFilter = new IntentFilter(PollService.ACTION_SHOW_NOTIFICATION);
-		getActivity().registerReceiver(mOnShowNotification, intentFilter);
+		getActivity().registerReceiver(mOnShowNotification, intentFilter
+				,PollService.PERM_PRIVATE,null);
 	}
 	
 	@Override

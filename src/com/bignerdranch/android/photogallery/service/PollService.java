@@ -36,6 +36,9 @@ public class PollService extends IntentService {
 	public static final String ACTION_SHOW_NOTIFICATION = 
 			"com.bignerdranch.android.photogallery.SHOW_NOTIFICATION";
 	
+	public static final String PERM_PRIVATE = 
+			"com.bignerdranch.android.photogallery.PRIVATE";
+	
 	public PollService() {
 		super(TAG);
 	}
@@ -100,13 +103,7 @@ public class PollService extends IntentService {
 					.setAutoCancel(true)
 					.build();
 			
-			NotificationManager notificationManager = 
-					(NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-			
-			notificationManager.notify(0, notification);
-			
-			Intent actionIntent = new Intent(ACTION_SHOW_NOTIFICATION);
-			sendBroadcast(actionIntent);
+			showBackgroundNotification(0, notification);
 			
 			//±£´æÐÂµÄid
 			SharedPreferences.Editor editor = pref.edit();
@@ -149,6 +146,16 @@ public class PollService extends IntentService {
 				PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_NO_CREATE);
 		boolean isOn = (pendingIntent != null);
 		return isOn;
+	}
+	
+	public void showBackgroundNotification(int requestCode,Notification notification){
+		
+		Intent intent = new Intent(ACTION_SHOW_NOTIFICATION);
+		intent.putExtra("REQUEST_CODE", requestCode);
+		intent.putExtra("NOTIFICATION", notification);
+		
+		sendOrderedBroadcast(intent, PERM_PRIVATE, null, null
+				, Activity.RESULT_OK, null, null);
 	}
 
 }

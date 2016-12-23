@@ -11,3 +11,4 @@
 *随系统重启而开启的定时器
 *过滤前台通知
 	1.发送broadcast intent
+	2.使用私有权限及使用ordered broadcast接收结果
