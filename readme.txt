@@ -12,3 +12,4 @@
 *过滤前台通知
 	1.发送broadcast intent
 	2.使用私有权限及使用ordered broadcast接收结果
+*使用简单方式浏览图片所在网页

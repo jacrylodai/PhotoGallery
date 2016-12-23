@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -91,6 +93,23 @@ public class PhotoGalleryFragment extends VisibleFragment{
 		
 		gvPhotoContainer = (GridView) view.findViewById(R.id.gv_photo_container);
 		setupAdapter();
+		
+		gvPhotoContainer.setOnItemClickListener(
+				new AdapterView.OnItemClickListener() {
+
+					@Override
+					public void onItemClick(AdapterView<?> parent,
+							View view, int position, long id) {
+
+						GalleryItem galleryItem = 
+								(GalleryItem) parent.getItemAtPosition(position);
+						String photoPageUrl = galleryItem.getPhotoPageUrl();
+						
+						Intent intent = new Intent(Intent.ACTION_VIEW);
+						intent.setData(Uri.parse(photoPageUrl));
+						PhotoGalleryFragment.this.getActivity().startActivity(intent);
+					}
+		});
 		return view;
 	}
 	
@@ -183,6 +202,7 @@ public class PhotoGalleryFragment extends VisibleFragment{
 					new GalleryItemAdapter(getActivity(),
 							R.layout.gallery_item_photo_view, galleryItemList);
 			gvPhotoContainer.setAdapter(adapter);
+			
 		}else{
 			gvPhotoContainer.setAdapter(null);
 		}

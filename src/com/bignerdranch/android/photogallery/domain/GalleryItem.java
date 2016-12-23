@@ -12,6 +12,8 @@ public class GalleryItem {
 	
 	private String url;
 	
+	private String owner;
+	
 	private Bitmap bitmap;
 	
 	private int retryTimes;
@@ -46,6 +48,14 @@ public class GalleryItem {
 		this.url = url;
 	}
 	
+	public String getOwner() {
+		return owner;
+	}
+
+	public void setOwner(String owner) {
+		this.owner = owner;
+	}
+
 	public Bitmap getBitmap() {
 		return bitmap;
 	}
@@ -71,6 +81,12 @@ public class GalleryItem {
 		}else{
 			return false;
 		}
+	}
+	
+	public String getPhotoPageUrl(){
+		
+		String url = "https://www.flickr.com/photos/"+owner+'/'+id;
+		return url;
 	}
 
 	@Override
